@@ -1,0 +1,10 @@
+go 1.22
+
+use (
+	./shared
+	./hiringdb
+	./ingestion-service
+	./coordinator-service
+	./worker-service
+	./analysis
+)
