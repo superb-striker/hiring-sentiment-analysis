@@ -1,0 +1,11 @@
+# Copy to terraform.tfvars and fill in for a real deployment.
+# Leave dynamodb_endpoint unset here -it's meant to be passed as
+# -var on the command line for local runs, not committed.
+
+aws_region = "us-east-1"
+table_name = "hiring_records"
+
+tags = {
+  Project     = "hiring-sentiment-pipeline"
+  Environment = "production"
+}
