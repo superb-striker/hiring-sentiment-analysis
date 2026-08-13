@@ -1,10 +1,10 @@
 go 1.22
 
 use (
-	./shared
+	./analysis
+	./coordinator-service
 	./hiringdb
 	./ingestion-service
-	./coordinator-service
+	./shared
 	./worker-service
-	./analysis
 )

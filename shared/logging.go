@@ -1,4 +1,4 @@
-package contracts
+package shared
 
 import (
 	"log/slog"

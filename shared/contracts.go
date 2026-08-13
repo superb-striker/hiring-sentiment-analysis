@@ -1,4 +1,6 @@
-package contracts
+package shared
+
+import "time"
 
 // HiringRecord mirrors the hiring_records DynamoDB item. Not every service
 // populates every field - ingestion writes company/timestamp/record_id/
@@ -17,6 +19,7 @@ type HiringRecord struct {
 	Status            string  `dynamodbav:"status"`
 	ProcessedBy       *string `dynamodbav:"processed_by,omitempty"`
 	RetryCount        int     `dynamodbav:"retry_count"`
+	IsHiringRelated   *bool   `dynamodbav:"is_hiring_related,omitempty"`
 }
 
 // Status enum values for HiringRecord.Status.
@@ -48,3 +51,39 @@ const (
 	RecordIDIndex          = "record_id-index"
 )
 
+// Retry/batching policy shared between coordinator and worker
+const (
+	MaxRetries = 3
+	BatchSize  = 25
+)
+ 
+// HeartbeatTTL is how stale a worker's last heartbeat can be before the coordinator considers it dead.
+const HeartbeatTTL = 30 * time.Second
+ 
+// TaskAssignment: Coordinator -> Worker (POST /assign)
+type TaskAssignment struct {
+	BatchID   string   `json:"batch_id"`
+	RecordIDs []string `json:"record_ids"`
+	Deadline  string   `json:"deadline"`
+}
+ 
+// TaskResultItem / TaskResult: Worker -> Coordinator (POST /result)
+type TaskResultItem struct {
+	RecordID string `json:"record_id"`
+	Status   string `json:"status"` // "complete" | "failed"
+	Error    string `json:"error,omitempty"`
+}
+ 
+type TaskResult struct {
+	BatchID  string           `json:"batch_id"`
+	WorkerID string           `json:"worker_id"`
+	Results  []TaskResultItem `json:"results"`
+}
+ 
+// Heartbeat: Worker -> Coordinator (POST /heartbeat)
+type Heartbeat struct {
+	WorkerID     string `json:"worker_id"`
+	Status       string `json:"status"` // "idle" | "busy"
+	Timestamp    string `json:"timestamp"`
+	CurrentBatch string `json:"current_batch"`
+}
